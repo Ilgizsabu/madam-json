@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
+    <style>
+      .block_painting {
+        margin: auto;
+        max-width: 800px;
+        box-sizing: border-box;
+        text-align: center;
+      }
+      
+      .hidden {
+        display: none;
+      }
+
+      .block_image {
+        display: block;
+        margin: auto;
+        margin-top: 10px;
+        max-width: 400px;
+        max-height: 400px;
+      }
+
+      .block_button {
+        margin: 20px auto;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .loader {
+        width: 24px;
+        height: 24px;
+        border: 5px dotted #dc0606;
+        border-radius: 50%;
+        display: inline-block;
+        position: relative;
+        box-sizing: border-box;
+        animation: rotation 2s linear infinite;
+      }
+
+      @keyframes rotation {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      } 
+    </style>
+</head>
+<body>
+  <div class="block block_painting">
+    <img class="block block_image" src="">
+    <p class="block block_description"></p>
+    <div class="result result_error"></div>
+    <button class="block block_button" type="submit">
+      Следующий экспонат
+      <span class="loader hidden"></span>
+    </button>
+  </div>
+  <script>
+    const blockPainting = document.querySelector('.block_painting');
+    const blockImage = document.querySelector('.block_image');
+    const blockDescription = document.querySelector('.block_description');
+    const blockButton = document.querySelector('.block_button');
+    const loader = document.querySelector('.loader');
+    
+    let numberJson = 1;
+    
+    const loadPage = () => {
+      loader.classList.remove('hidden');
+      const numberMasterpiece = numberJson + ".json";
+      fetch(`/madam-json/museum/${numberMasterpiece}`)
+        .then(response => response.json())
+        .then(result => {
+            blockDescription.textContent = result.description;
+            blockImage.src = result.imageUrl;
+            blockButton.textContent = 'Следующий экспонат';
+          })        
+          .catch(error => {
+            blockDescription.textContent = 'Вы дошли до конца выставки!';
+            blockButton.textContent = 'Начать сначала';
+            numberJson = 0;
+          })
+          .finally(() => {
+            blockButton.disabled = false;
+            blockLoader.classList.add('hidden');
+        })
+      };
+      
+      document.addEventListener("DOMContentLoaded", () => {
+        blockButton.addEventListener('click', () => {
+        blockButton.disabled = true;
+        blockDescription.textContent = '';
+        blockImage.src = '';
+        numberJson ++;
+        loadPage();
+      })
+    });
+
+    loadPage();
+  </script>
+</body>
+</html>
